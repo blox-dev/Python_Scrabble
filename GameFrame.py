@@ -1,14 +1,17 @@
 from tkinter import *
 from PIL import ImageTk, Image
 from constants import GRID_SIZE, TILE_SIZE, SEPARATOR_SIZE
+from GameManager import GameManager
+from sys import exc_info
 
 
 # TODO: class refactoring!
 
 class GameFrame(Frame):
-    def __init__(self, parent, user_input):
+    def __init__(self, parent, dictionary_file):
+        self.gm = GameManager(dictionary_file)
+
         self.img = Image.open("img/hover_placement.png")
-        self.img_cpy = Image.open("img/hover_placement.png")
 
         self.bgImage = ImageTk.PhotoImage(Image.open("img/scrabble_board.png"))
 
@@ -19,7 +22,6 @@ class GameFrame(Frame):
         self.word_direction = [1, 0]
         self.word_direction_changed = False
 
-        self.user_input = user_input
         self.hover_rect = Label(self, image=ImageTk.PhotoImage(self.img))
 
         self.background = Label(self, image=self.bgImage)
@@ -29,17 +31,26 @@ class GameFrame(Frame):
 
         self.background.place(x=0, y=0)
 
+        self.pack()
+
+        player_letters = self.gm.draw(7)
+
+        letters_label = Label(parent, text="Your letters are: {}".format(player_letters), padx=10, pady=10)
+        letters_label.pack()
+
+        self.user_input = Entry(parent)
+        self.user_input.pack(pady=10)
+
     def change_word_direction(self, event):
         self.word_direction[0] = 1 - self.word_direction[0]
         self.word_direction[1] = 1 - self.word_direction[1]
         self.word_direction_changed = True
 
-    @staticmethod
-    def attempt_word_placement(posx, posy, direction, word):
-        print(posx, posy, direction, word)
-
     def place_word(self, event):
-        GameFrame.attempt_word_placement(self.hover_x, self.hover_y, self.word_direction, self.user_input.get())
+        try:
+            self.gm.attempt_word_placement(self.hover_x, self.hover_y, self.word_direction, self.user_input.get())
+        except ValueError:
+            print(exc_info()[1])
 
     def myfunction(self, event):
         new_x = (event.x - SEPARATOR_SIZE // 2) // (TILE_SIZE + SEPARATOR_SIZE)
@@ -54,7 +65,7 @@ class GameFrame(Frame):
 
         if len(self.user_input.get()) != self.hover_length or self.word_direction_changed:
             hover_length = len(self.user_input.get())
-            img_cpy = self.img.resize(
+            img_cpy = self.img.resize(  # TODO: put in own if condition
                 ((TILE_SIZE + SEPARATOR_SIZE) * (hover_length if self.word_direction[0] == 1 else 1),
                  (TILE_SIZE + SEPARATOR_SIZE) * (hover_length if self.word_direction[1] == 1 else 1)),
                 Image.ANTIALIAS)
