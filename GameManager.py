@@ -1,16 +1,15 @@
 from LetterGenerator import LetterGenerator
-from utils import read_dict
+import utils
 from constants import GRID_SIZE
 
 
 class GameManager:
     def __init__(self, dictionary_file):
-        self.gameBoard = [['-'] * GRID_SIZE] * GRID_SIZE
-        self.gameBoard[GRID_SIZE // 2][GRID_SIZE // 2] = '0'
-
+        self.gameBoard = ['-' * GRID_SIZE] * GRID_SIZE
+        self.gameBoard[GRID_SIZE // 2] = '-' * (GRID_SIZE // 2) + '0' + '-' * (GRID_SIZE // 2)
         self.lg = LetterGenerator()
         self.player_letters = []
-        self.dictionary = read_dict(dictionary_file)
+        self.dictionary = utils.read_dict(dictionary_file)
 
     def draw(self, number_of_letters):
         drawn_letters = self.lg.draw(number_of_letters)
@@ -52,6 +51,9 @@ class GameManager:
                 raise ValueError("Your can't place your word there")
 
         self.place_word(hover_x, hover_y, word_direction, word)
+        return True
 
     def place_word(self, hover_x, hover_y, word_direction, word):
-        print("Yay")
+        for i in range(len(word)):
+            row, col = hover_y + i * word_direction[1], hover_x + i * word_direction[0]
+            self.gameBoard[row] = self.gameBoard[row][:col] + word[i] + self.gameBoard[row][col+1:]
