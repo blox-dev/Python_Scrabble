@@ -1,5 +1,4 @@
 from PIL import Image, ImageTk
-import os
 
 
 def read_dict(file):

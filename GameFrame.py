@@ -14,6 +14,7 @@ class GameFrame(Frame):
         self.gm = GameManager(dictionary_file)
 
         self.hover_img = Image.open("img/hover_placement.png")
+        self.hover_img_cpy = None
         self.letter_ref = utils.create_letter_images()
         self.bgImage = ImageTk.PhotoImage(Image.open("img/scrabble_board.png"))
 
@@ -27,7 +28,7 @@ class GameFrame(Frame):
         self.hover_rect = Label(self, image=ImageTk.PhotoImage(self.hover_img))
 
         self.background = Label(self, image=self.bgImage)
-        self.background.bind('<Motion>', self.myfunction)
+        self.background.bind('<Motion>', self.motion_function)
 
         parent.bind('<Button-3>', self.change_word_direction)
 
@@ -35,13 +36,16 @@ class GameFrame(Frame):
 
         self.pack()
 
+        self.error_text = Label(parent, text="", pady=5, fg='red', font=('TkDefaultFont', 15))
+        self.error_text.pack()
+
         player_letters = self.gm.draw(7)
 
-        letters_label = Label(parent, text="Your letters are: {}".format(player_letters), padx=10, pady=10)
-        letters_label.pack()
+        self.letters_label = Label(parent, text="Your letters are: {}".format(player_letters), pady=5)
+        self.letters_label.pack()
 
         self.user_input = Entry(parent)
-        self.user_input.pack(pady=10)
+        self.user_input.pack(pady=5)
 
     def change_word_direction(self, event):
         self.word_direction[0] = 1 - self.word_direction[0]
@@ -50,13 +54,18 @@ class GameFrame(Frame):
 
     def place_word(self, event):
         try:
-            if self.gm.attempt_word_placement(self.hover_x, self.hover_y, self.word_direction, self.user_input.get()):
-                self.place_word_on_canvas()
+            new_player_letters = self.gm.attempt_word_placement(self.hover_x, self.hover_y, self.word_direction,
+                                                                self.user_input.get())
+            self.place_word_on_canvas()
+            self.letters_label.config(text="Your letters are: {}".format(new_player_letters))
+            self.letters_label.pack()
 
         except ValueError:
-            print(exc_info()[1])
+            self.error_text.config(text=exc_info()[1])
+        except Exception:
+            self.error_text.config(text="Unexpected error.")
 
-    def myfunction(self, event, x=None, y=None):
+    def motion_function(self, event, x=None, y=None):
 
         if x is None and y is None:
             new_x = (event.x - SEPARATOR_SIZE // 2) // (TILE_SIZE + SEPARATOR_SIZE)
@@ -65,7 +74,6 @@ class GameFrame(Frame):
             new_x = x
             new_y = y
             self.hover_x = 0
-        print(new_x, new_y)
 
         if new_x >= GRID_SIZE or new_x < 0 or new_y >= GRID_SIZE or new_y < 0:
             return
@@ -75,14 +83,14 @@ class GameFrame(Frame):
             return
 
         if len(self.user_input.get()) != self.hover_length or self.word_direction_changed:
-            hover_length = len(self.user_input.get())
+            self.hover_length = len(self.user_input.get())
             img_cpy = self.hover_img.resize(  # TODO: put in own if condition
-                ((TILE_SIZE + SEPARATOR_SIZE) * (hover_length if self.word_direction[0] == 1 else 1),
-                 (TILE_SIZE + SEPARATOR_SIZE) * (hover_length if self.word_direction[1] == 1 else 1)),
+                ((TILE_SIZE + SEPARATOR_SIZE) * (self.hover_length if self.word_direction[0] == 1 else 1),
+                 (TILE_SIZE + SEPARATOR_SIZE) * (self.hover_length if self.word_direction[1] == 1 else 1)),
                 Image.ANTIALIAS)
-            self.okk = ImageTk.PhotoImage(img_cpy)
+            self.hover_img_cpy = ImageTk.PhotoImage(img_cpy)
             self.hover_rect.place_forget()
-            self.hover_rect = Label(self, image=self.okk)
+            self.hover_rect = Label(self, image=self.hover_img_cpy)
 
         if len(self.user_input.get()) != 0:
             if new_y != self.hover_y or new_x != self.hover_x or self.word_direction_changed:
@@ -100,9 +108,9 @@ class GameFrame(Frame):
 
             letter_label.bind('<Motion>',
                               lambda event, ind=i, hovx=self.hover_x, hovy=self.hover_y, xx=self.word_direction[0], yy=self.word_direction[1]:
-                              self.myfunction(event,
-                                              x=hovx + ind * xx,
-                                              y=hovy + ind * yy))
+                              self.motion_function(event,
+                                                   x=hovx + ind * xx,
+                                                   y=hovy + ind * yy))
             letter_label.place(
                 x=(self.hover_x + i * self.word_direction[0]) * (TILE_SIZE + SEPARATOR_SIZE) + SEPARATOR_SIZE // 2,
                 y=(self.hover_y + i * self.word_direction[1]) * (TILE_SIZE + SEPARATOR_SIZE) + SEPARATOR_SIZE // 2)

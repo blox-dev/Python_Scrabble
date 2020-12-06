@@ -17,7 +17,7 @@ class GameManager:
         return drawn_letters
 
     def attempt_word_placement(self, hover_x, hover_y, word_direction, word):
-        print(hover_x, hover_y, word_direction, word, self.player_letters)
+
         word = word.upper()
         word_len = len(word)
 
@@ -29,10 +29,7 @@ class GameManager:
             if letter not in pl:
                 raise ValueError("You can't make your word from those letters")
 
-            for index in range(len(pl)):
-                if pl[index] == letter:
-                    pl[index] = '0'
-                    break
+            pl.remove(letter)
 
         # WORD IS OKAY
         ok = 0
@@ -50,10 +47,29 @@ class GameManager:
             if self.gameBoard[row][col] not in ['-', '0'] and self.gameBoard[row][col] != word[i]:
                 raise ValueError("Your can't place your word there")
 
+        # PLACEMENT IS OKAY
+
+        # REMOVE LETTERS
+
+        letters_to_remove = []
+
+        for i in range(word_len):
+            row, col = hover_y + i * word_direction[1], hover_x + i * word_direction[0]
+            if self.gameBoard[row][col] in ['-', '0']:
+                letters_to_remove.append(word[i])
+
+        for letter in letters_to_remove:
+            self.player_letters.remove(letter)
+
+        # ADD NEW LETTERS
+
+        self.player_letters.extend(self.lg.draw(len(letters_to_remove)))
+
         self.place_word(hover_x, hover_y, word_direction, word)
-        return True
+
+        return self.player_letters
 
     def place_word(self, hover_x, hover_y, word_direction, word):
         for i in range(len(word)):
             row, col = hover_y + i * word_direction[1], hover_x + i * word_direction[0]
-            self.gameBoard[row] = self.gameBoard[row][:col] + word[i] + self.gameBoard[row][col+1:]
+            self.gameBoard[row] = self.gameBoard[row][:col] + word[i] + self.gameBoard[row][col + 1:]
