@@ -57,8 +57,10 @@ class GameFrame(Frame):
             new_player_letters = self.gm.attempt_word_placement(self.hover_x, self.hover_y, self.word_direction,
                                                                 self.user_input.get())
             self.place_word_on_canvas()
+
             self.letters_label.config(text="Your letters are: {}".format(new_player_letters))
-            self.letters_label.pack()
+
+            self.error_text.config(text="")
 
         except ValueError:
             self.error_text.config(text=exc_info()[1])
