@@ -47,6 +47,9 @@ class GameFrame(Frame):
         self.user_input = Entry(parent)
         self.user_input.pack(pady=5)
 
+        self.discard_button = Button(parent, text="Discard letters", command=self.discard_letters)
+        self.discard_button.pack(pady=5)
+
     def change_word_direction(self, event):
         self.word_direction[0] = 1 - self.word_direction[0]
         self.word_direction[1] = 1 - self.word_direction[1]
@@ -57,6 +60,19 @@ class GameFrame(Frame):
             new_player_letters = self.gm.attempt_word_placement(self.hover_x, self.hover_y, self.word_direction,
                                                                 self.user_input.get())
             self.place_word_on_canvas()
+
+            self.letters_label.config(text="Your letters are: {}".format(new_player_letters))
+
+            self.error_text.config(text="")
+
+        except ValueError:
+            self.error_text.config(text=exc_info()[1])
+        except Exception:
+            self.error_text.config(text="Unexpected error.")
+
+    def discard_letters(self):
+        try:
+            new_player_letters = self.gm.attempt_dicard_letters(self.user_input.get())
 
             self.letters_label.config(text="Your letters are: {}".format(new_player_letters))
 

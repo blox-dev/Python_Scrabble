@@ -14,6 +14,7 @@ class GameManager:
     def draw(self, number_of_letters):
         drawn_letters = self.lg.draw(number_of_letters)
         self.player_letters.extend(drawn_letters)
+        print("Letters left:", len(self.lg.letters))
         return drawn_letters
 
     def attempt_word_placement(self, hover_x, hover_y, word_direction, word):
@@ -76,7 +77,7 @@ class GameManager:
 
         # ADD NEW LETTERS
 
-        self.player_letters.extend(self.lg.draw(len(letters_to_remove)))
+        self.draw(len(letters_to_remove))
 
         self.place_word(hover_x, hover_y, word_direction, word)
 
@@ -86,3 +87,28 @@ class GameManager:
         for i in range(len(word)):
             row, col = hover_y + i * word_direction[1], hover_x + i * word_direction[0]
             self.gameBoard[row] = self.gameBoard[row][:col] + word[i] + self.gameBoard[row][col + 1:]
+
+    def attempt_dicard_letters(self, word):
+        word = word.upper()
+        word_len = len(word)
+
+        if word_len < 1 or word_len > 7:
+            raise ValueError("You must discard between 1 and 7 letters")
+
+        player_letters = self.player_letters[:]
+        for letter in word:
+            if letter not in player_letters:
+                raise ValueError("You don't have these letters".format(word))
+
+            player_letters.remove(letter)
+
+        # REMOVE LETTERS
+
+        for letter in word:
+            self.player_letters.remove(letter)
+
+        # ADD NEW LETTERS
+
+        self.draw(word_len)
+
+        return self.player_letters

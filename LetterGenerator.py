@@ -9,6 +9,6 @@ class LetterGenerator:
     def draw(self, number_of_letters):
         random.shuffle(self.letters)
         drawn_letters = self.letters[:number_of_letters].copy()
-        self.letters = self.letters[number_of_letters + 1:]
+        self.letters = self.letters[number_of_letters:]
         return drawn_letters
 
