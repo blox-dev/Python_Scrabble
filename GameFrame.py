@@ -1,7 +1,6 @@
 from tkinter import *
 from PIL import ImageTk, Image
 from constants import GRID_SIZE, TILE_SIZE, SEPARATOR_SIZE
-from GameManager import GameManager
 from sys import exc_info
 import utils
 
@@ -10,9 +9,9 @@ import utils
 # TODO: add PEP comments
 
 class GameFrame(Frame):
-    def __init__(self, parent, dictionary_file):
-        self.gm = GameManager(dictionary_file)
-
+    def __init__(self, parent, game_manager):
+        self.gm = game_manager
+        self.of = None
         self.hover_img = Image.open("img/hover_placement.png")
         self.hover_img_cpy = None
         self.letter_ref = utils.create_letter_images()
@@ -34,22 +33,6 @@ class GameFrame(Frame):
 
         self.background.place(x=0, y=0)
 
-        self.pack()
-
-        self.error_text = Label(parent, text="", pady=5, fg='red', font=('TkDefaultFont', 15))
-        self.error_text.pack()
-
-        player_letters = self.gm.draw(7)
-
-        self.letters_label = Label(parent, text="Your letters are: {}".format(player_letters), pady=5)
-        self.letters_label.pack()
-
-        self.user_input = Entry(parent)
-        self.user_input.pack(pady=5)
-
-        self.discard_button = Button(parent, text="Discard letters", command=self.discard_letters)
-        self.discard_button.pack(pady=5)
-
     def change_word_direction(self, event):
         self.word_direction[0] = 1 - self.word_direction[0]
         self.word_direction[1] = 1 - self.word_direction[1]
@@ -57,31 +40,20 @@ class GameFrame(Frame):
 
     def place_word(self, event):
         try:
-            new_player_letters = self.gm.attempt_word_placement(self.hover_x, self.hover_y, self.word_direction,
-                                                                self.user_input.get())
+            self.gm.attempt_word_placement(self.hover_x, self.hover_y, self.word_direction, self.of.user_input.get())
+
+            new_player_letters = self.gm.get_player_letters()
+
             self.place_word_on_canvas()
 
-            self.letters_label.config(text="Your letters are: {}".format(new_player_letters))
+            self.of.letters_label.config(text="Your letters are: {}".format(new_player_letters))
 
-            self.error_text.config(text="")
-
-        except ValueError:
-            self.error_text.config(text=exc_info()[1])
-        except Exception:
-            self.error_text.config(text="Unexpected error.")
-
-    def discard_letters(self):
-        try:
-            new_player_letters = self.gm.attempt_dicard_letters(self.user_input.get())
-
-            self.letters_label.config(text="Your letters are: {}".format(new_player_letters))
-
-            self.error_text.config(text="")
+            self.of.error_text.config(text="")
 
         except ValueError:
-            self.error_text.config(text=exc_info()[1])
+            self.of.error_text.config(text=exc_info()[1])
         except Exception:
-            self.error_text.config(text="Unexpected error.")
+            self.of.error_text.config(text="Unexpected error.")
 
     def motion_function(self, event, x=None, y=None):
 
@@ -96,12 +68,12 @@ class GameFrame(Frame):
         if new_x >= GRID_SIZE or new_x < 0 or new_y >= GRID_SIZE or new_y < 0:
             return
 
-        if len(self.user_input.get()) == 0:
+        if len(self.of.user_input.get()) == 0:
             self.hover_rect.place_forget()
             return
 
-        if len(self.user_input.get()) != self.hover_length or self.word_direction_changed:
-            self.hover_length = len(self.user_input.get())
+        if len(self.of.user_input.get()) != self.hover_length or self.word_direction_changed:
+            self.hover_length = len(self.of.user_input.get())
             img_cpy = self.hover_img.resize(  # TODO: put in own if condition
                 ((TILE_SIZE + SEPARATOR_SIZE) * (self.hover_length if self.word_direction[0] == 1 else 1),
                  (TILE_SIZE + SEPARATOR_SIZE) * (self.hover_length if self.word_direction[1] == 1 else 1)),
@@ -110,7 +82,7 @@ class GameFrame(Frame):
             self.hover_rect.place_forget()
             self.hover_rect = Label(self, image=self.hover_img_cpy)
 
-        if len(self.user_input.get()) != 0:
+        if len(self.of.user_input.get()) != 0:
             if new_y != self.hover_y or new_x != self.hover_x or self.word_direction_changed:
                 self.word_direction_changed = False
                 self.hover_y = new_y
@@ -120,7 +92,7 @@ class GameFrame(Frame):
                                       y=self.hover_y * (TILE_SIZE + SEPARATOR_SIZE) + SEPARATOR_SIZE // 2)
 
     def place_word_on_canvas(self):
-        word = self.user_input.get().upper()
+        word = self.of.user_input.get().upper()
         for i in range(len(word)):
             letter_label = Label(self, image=self.letter_ref[ord(word[i]) - ord('A')])
 
@@ -132,3 +104,6 @@ class GameFrame(Frame):
             letter_label.place(
                 x=(self.hover_x + i * self.word_direction[0]) * (TILE_SIZE + SEPARATOR_SIZE) + SEPARATOR_SIZE // 2,
                 y=(self.hover_y + i * self.word_direction[1]) * (TILE_SIZE + SEPARATOR_SIZE) + SEPARATOR_SIZE // 2)
+
+    def setOptionsFrame(self, of):
+        self.of = of

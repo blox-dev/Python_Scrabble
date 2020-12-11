@@ -8,16 +8,23 @@ class GameManager:
         self.gameBoard = ['-' * GRID_SIZE] * GRID_SIZE
         self.gameBoard[GRID_SIZE // 2] = '-' * (GRID_SIZE // 2) + '0' + '-' * (GRID_SIZE // 2)
         self.lg = LetterGenerator()
-        self.player_letters = []
+        self.current_player = 1
+        self.player1_letters = self.draw(7)
+        self.player2_letters = self.draw(7)
         self.dictionary = utils.read_dict(dictionary_file)
 
     def draw(self, number_of_letters):
         drawn_letters = self.lg.draw(number_of_letters)
-        self.player_letters.extend(drawn_letters)
         print("Letters left:", len(self.lg.letters))
         return drawn_letters
 
+    def get_player_letters(self):
+        if self.current_player == 1:
+            return self.player1_letters
+        return self.player2_letters
+
     def attempt_word_placement(self, hover_x, hover_y, word_direction, word):
+        player_letters = self.get_player_letters()
 
         word = word.upper()
         word_len = len(word)
@@ -47,14 +54,14 @@ class GameManager:
         if len(letters_on_board) == 0 and not contains_starting_tile:
             raise ValueError("You must place your word connected to another word")
 
-        player_letters = self.player_letters[:]
-        player_letters.extend(letters_on_board)
+        pl_let = player_letters[:]
+        pl_let.extend(letters_on_board)
 
         for letter in word:
-            if letter not in player_letters:
+            if letter not in pl_let:
                 raise ValueError("You can't make '{}' from your letters".format(word))
 
-            player_letters.remove(letter)
+            pl_let.remove(letter)
 
         for i in range(word_len):
             row, col = hover_y + i * word_direction[1], hover_x + i * word_direction[0]
@@ -73,42 +80,44 @@ class GameManager:
                 letters_to_remove.append(word[i])
 
         for letter in letters_to_remove:
-            self.player_letters.remove(letter)
+            player_letters.remove(letter)
 
         # ADD NEW LETTERS
 
-        self.draw(len(letters_to_remove))
+        player_letters.extend(self.draw(len(letters_to_remove)))
 
         self.place_word(hover_x, hover_y, word_direction, word)
-
-        return self.player_letters
+        self.current_player = 1 - self.current_player
+        return True
 
     def place_word(self, hover_x, hover_y, word_direction, word):
         for i in range(len(word)):
             row, col = hover_y + i * word_direction[1], hover_x + i * word_direction[0]
             self.gameBoard[row] = self.gameBoard[row][:col] + word[i] + self.gameBoard[row][col + 1:]
 
-    def attempt_dicard_letters(self, word):
+    def attempt_discard_letters(self, word):
+        player_letters = self.get_player_letters()
+
         word = word.upper()
         word_len = len(word)
 
         if word_len < 1 or word_len > 7:
             raise ValueError("You must discard between 1 and 7 letters")
 
-        player_letters = self.player_letters[:]
+        pl_let = player_letters[:]
         for letter in word:
-            if letter not in player_letters:
+            if letter not in pl_let:
                 raise ValueError("You don't have these letters".format(word))
 
-            player_letters.remove(letter)
+            pl_let.remove(letter)
 
         # REMOVE LETTERS
 
         for letter in word:
-            self.player_letters.remove(letter)
+            player_letters.remove(letter)
 
         # ADD NEW LETTERS
 
-        self.draw(word_len)
-
-        return self.player_letters
+        player_letters.extend(self.draw(word_len))
+        self.current_player = 1 - self.current_player
+        return True
