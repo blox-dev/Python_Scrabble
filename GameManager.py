@@ -24,6 +24,8 @@ class GameManager:
         self.player1_letters = self.draw(7)
         self.player2_letters = self.draw(7)
 
+        print(self.player1_letters, self.player2_letters)
+
         self.player1_score = 0
         self.player2_score = 0
 
@@ -47,7 +49,7 @@ class GameManager:
     def get_player(self):
         if self.current_player == 1:
             return [self.player1_name, self.player1_letters, self.player1_score]
-        return [self.player2_name, self.player1_letters, self.player2_score]
+        return [self.player2_name, self.player2_letters, self.player2_score]
 
     def change_player(self):
         self.current_player = 3 - self.current_player
@@ -59,8 +61,8 @@ class GameManager:
         word = word.upper()
         word_len = len(word)
 
-        if word_len < 2 or word_len > 7:
-            raise ValueError("Your word must be between 2 and 7 letters long")
+        if word_len < 2:
+            raise ValueError("Your word must be at least two letters long")
 
         # if word not in self.dictionary:
         #     raise ValueError("The word '{}' doesn't exist in your dictionary!".format(word))
@@ -160,10 +162,9 @@ class GameManager:
         return True
 
     def wait_for_game_exit(self):
-        dlg = Toplevel(self.root)
+        dlg = Toplevel(self.root, height=1, width=1)
         dlg.protocol("WM_DELETE_WINDOW", dlg.destroy)  # intercept close button
         dlg.focus_force()
-        dlg.transient(self.root)  # dialog window is related to main
         dlg.wait_visibility()  # can't grab until window appears, so we wait
         dlg.grab_set()  # ensure all input goes to our window
         dlg.bind('<KeyPress>', lambda event: dlg.destroy())

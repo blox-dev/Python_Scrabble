@@ -10,7 +10,6 @@ import utils
 
 class GameFrame(Frame):
     def __init__(self, parent, game_manager):
-        self.parent = parent
         self.gm = game_manager
         self.of = None
         self.hover_img = Image.open("img/hover_placement.png")
@@ -59,19 +58,23 @@ class GameFrame(Frame):
                 if game_state[1] == 0:
                     self.of.error_text.config(
                         text="Game is over. It's a tie! Press any key to exit".format(game_state[1]))
+                    self.of.T.insert(END, "\nIt's a tie!")
                 else:
                     self.of.error_text.config(text="Game is over. {} wins! Press any key to exit".format(game_state[1]))
-
+                    self.of.T.insert(END, "\n{} wins!".format(game_state[1]))
+                self.of.T.see(END)
                 self.hover_rect.destroy()
 
                 self.gm.wait_for_game_exit()
 
             self.gm.change_player()
 
-            self.of.T.insert(END, "\nIt is {}'s turn.".format(self.gm.get_player()[0]))
+            new_player = self.gm.get_player()
+
+            self.of.T.insert(END, "\nIt is {}'s turn.".format(new_player[0]))
             self.of.T.see(END)
 
-            self.of.letters_label.config(text="Your letters are: {}".format(player[1]))
+            self.of.letters_label.config(text="Your letters are: {}".format(new_player[1]))
             self.of.error_text.config(text="There are {} letters left".format(self.gm.get_number_of_letters_left()))
             self.of.user_input.delete(0, END)
         except ValueError:

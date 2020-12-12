@@ -4,7 +4,6 @@ from sys import exc_info
 
 class OptionsFrame(Frame):
     def __init__(self, parent, game_manager, game_frame):
-        self.parent = parent
         Frame.__init__(self, parent)
         self.gm = game_manager
         self.gf = game_frame
@@ -28,7 +27,7 @@ class OptionsFrame(Frame):
         # Control panel
 
         player_letters = self.gm.get_player()[1]
-
+        print(player_letters)
         self.letters_label = Label(self, text="Your letters are: {}".format(player_letters))
         self.letters_label.grid(row=1, column=1)
 
@@ -56,10 +55,13 @@ class OptionsFrame(Frame):
             game_state = self.gm.is_game_over()
             if game_state[0]:
                 if game_state[1] == 0:
-                    self.error_text.config(text="Game is over. It's a tie!".format(game_state[1]))
+                    self.error_text.config(text="Game is over. It's a tie! Press any key to exit")
+                    self.T.insert(END, "\nIt's a tie!")
                 else:
-                    self.error_text.config(text="Game is over. {} wins!".format(game_state[1]))
+                    self.error_text.config(text="Game is over. {} wins! Press any key to exit".format(game_state[1]))
+                    self.T.insert(END, "\n{} wins!".format(game_state[1]))
 
+                self.T.see(END)
                 self.gm.wait_for_game_exit()
 
             self.gm.change_player()
