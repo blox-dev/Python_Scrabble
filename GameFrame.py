@@ -1,4 +1,4 @@
-from tkinter import *
+from tkinter import Frame, Label, END
 from PIL import ImageTk, Image
 from constants import GRID_SIZE, TILE_SIZE, SEPARATOR_SIZE
 from sys import exc_info
@@ -42,39 +42,38 @@ class GameFrame(Frame):
         try:
             self.gm.attempt_word_placement(self.hover_x, self.hover_y, self.word_direction, self.of.user_input.get())
 
-            player = self.gm.get_player()
+            player = self.gm.get_active_player()
 
-            if player[0] == self.gm.player1_name:
-                self.of.score_1.config(text="{}: {}".format(player[0], player[2]))
+            if player["name"] == self.gm.player1["name"]:
+                self.of.score_1.config(text="{}: {}".format(player["name"], player["score"]))
             else:
-                self.of.score_2.config(text="{}: {}".format(player[0], player[2]))
+                self.of.score_2.config(text="{}: {}".format(player["name"], player["score"]))
 
-            self.of.T.insert(END, "\n{} played: '{}'".format(player[0], self.of.user_input.get().upper()))
+            self.of.T.insert(END, "\n{} played: '{}'".format(player["name"], self.of.user_input.get().upper()))
 
             self.place_word_on_canvas()
 
-            game_state = self.gm.is_game_over()
-            if game_state[0]:
-                if game_state[1] == 0:
-                    self.of.error_text.config(
-                        text="Game is over. It's a tie! Press any key to exit".format(game_state[1]))
+            game_state, winner = self.gm.is_game_over()
+            if game_state:
+                if winner == 0:
+                    self.of.error_text.config(text="Game is over. It's a tie! Press any key to exit")
                     self.of.T.insert(END, "\nIt's a tie!")
                 else:
-                    self.of.error_text.config(text="Game is over. {} wins! Press any key to exit".format(game_state[1]))
-                    self.of.T.insert(END, "\n{} wins!".format(game_state[1]))
+                    self.of.error_text.config(text="Game is over. {} wins! Press any key to exit".format(winner["name"]))
+                    self.of.T.insert(END, "\n{} wins!".format(winner["name"]))
+
                 self.of.T.see(END)
                 self.hover_rect.destroy()
-
                 self.gm.wait_for_game_exit()
 
             self.gm.change_player()
 
-            new_player = self.gm.get_player()
+            new_player = self.gm.get_active_player()
 
-            self.of.T.insert(END, "\nIt is {}'s turn.".format(new_player[0]))
+            self.of.T.insert(END, "\nIt is {}'s turn.".format(new_player["name"]))
             self.of.T.see(END)
 
-            self.of.letters_label.config(text="Your letters are: {}".format(new_player[1]))
+            self.of.letters_label.config(text="Your letters are: {}".format(new_player["letters"]))
             self.of.error_text.config(text="There are {} letters left".format(self.gm.get_number_of_letters_left()))
             self.of.user_input.delete(0, END)
         except ValueError:

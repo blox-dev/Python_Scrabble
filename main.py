@@ -1,4 +1,4 @@
-from tkinter import *
+from tkinter import Tk
 
 from GameManager import GameManager
 from GameFrame import GameFrame
