@@ -1,30 +1,60 @@
 from LetterGenerator import LetterGenerator
+from ScoreManager import ScoreManager
 import utils
 from constants import GRID_SIZE
+from tkinter import Toplevel
 
+
+# TODO: needs a lot of cleanup
 
 class GameManager:
-    def __init__(self, dictionary_file):
+    def __init__(self, root, dictionary_file):
+        self.root = root
         self.gameBoard = ['-' * GRID_SIZE] * GRID_SIZE
         self.gameBoard[GRID_SIZE // 2] = '-' * (GRID_SIZE // 2) + '0' + '-' * (GRID_SIZE // 2)
         self.lg = LetterGenerator()
+        self.sm = ScoreManager()
+        self.dictionary = utils.read_dict(dictionary_file)
+
         self.current_player = 1
+
+        self.player1_name = "Player1"
+        self.player2_name = "Player2"
+
         self.player1_letters = self.draw(7)
         self.player2_letters = self.draw(7)
-        self.dictionary = utils.read_dict(dictionary_file)
+
+        self.player1_score = 0
+        self.player2_score = 0
+
+    def is_game_over(self):
+        if len(self.lg.letters) == 0:
+            if self.player1_score > self.player2_score:
+                return [True, self.player1_name]
+            elif self.player1_score < self.player2_score:
+                return [True, self.player2_name]
+            else:
+                return [True, 0]
+        return [False, 0]
 
     def draw(self, number_of_letters):
         drawn_letters = self.lg.draw(number_of_letters)
-        print("Letters left:", len(self.lg.letters))
         return drawn_letters
 
-    def get_player_letters(self):
+    def get_number_of_letters_left(self):
+        return len(self.lg.letters)
+
+    def get_player(self):
         if self.current_player == 1:
-            return self.player1_letters
-        return self.player2_letters
+            return [self.player1_name, self.player1_letters, self.player1_score]
+        return [self.player2_name, self.player1_letters, self.player2_score]
+
+    def change_player(self):
+        self.current_player = 3 - self.current_player
 
     def attempt_word_placement(self, hover_x, hover_y, word_direction, word):
-        player_letters = self.get_player_letters()
+        player = self.get_player()
+        player_letters = player[1]
 
         word = word.upper()
         word_len = len(word)
@@ -87,7 +117,14 @@ class GameManager:
         player_letters.extend(self.draw(len(letters_to_remove)))
 
         self.place_word(hover_x, hover_y, word_direction, word)
-        self.current_player = 1 - self.current_player
+
+        score = self.sm.calculate_word_score(hover_x, hover_y, word_direction, word)
+
+        if player[0] == self.player1_name:
+            self.player1_score += score
+        else:
+            self.player2_score += score
+
         return True
 
     def place_word(self, hover_x, hover_y, word_direction, word):
@@ -96,7 +133,8 @@ class GameManager:
             self.gameBoard[row] = self.gameBoard[row][:col] + word[i] + self.gameBoard[row][col + 1:]
 
     def attempt_discard_letters(self, word):
-        player_letters = self.get_player_letters()
+        player = self.get_player()
+        player_letters = player[1]
 
         word = word.upper()
         word_len = len(word)
@@ -119,5 +157,15 @@ class GameManager:
         # ADD NEW LETTERS
 
         player_letters.extend(self.draw(word_len))
-        self.current_player = 1 - self.current_player
         return True
+
+    def wait_for_game_exit(self):
+        dlg = Toplevel(self.root)
+        dlg.protocol("WM_DELETE_WINDOW", dlg.destroy)  # intercept close button
+        dlg.focus_force()
+        dlg.transient(self.root)  # dialog window is related to main
+        dlg.wait_visibility()  # can't grab until window appears, so we wait
+        dlg.grab_set()  # ensure all input goes to our window
+        dlg.bind('<KeyPress>', lambda event: dlg.destroy())
+        dlg.wait_window()  # block until window is destroyed
+        exit(0)

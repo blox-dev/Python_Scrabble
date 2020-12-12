@@ -10,6 +10,7 @@ import utils
 
 class GameFrame(Frame):
     def __init__(self, parent, game_manager):
+        self.parent = parent
         self.gm = game_manager
         self.of = None
         self.hover_img = Image.open("img/hover_placement.png")
@@ -42,18 +43,42 @@ class GameFrame(Frame):
         try:
             self.gm.attempt_word_placement(self.hover_x, self.hover_y, self.word_direction, self.of.user_input.get())
 
-            new_player_letters = self.gm.get_player_letters()
+            player = self.gm.get_player()
+
+            if player[0] == self.gm.player1_name:
+                self.of.score_1.config(text="{}: {}".format(player[0], player[2]))
+            else:
+                self.of.score_2.config(text="{}: {}".format(player[0], player[2]))
+
+            self.of.T.insert(END, "\n{} played: '{}'".format(player[0], self.of.user_input.get().upper()))
 
             self.place_word_on_canvas()
 
-            self.of.letters_label.config(text="Your letters are: {}".format(new_player_letters))
+            game_state = self.gm.is_game_over()
+            if game_state[0]:
+                if game_state[1] == 0:
+                    self.of.error_text.config(
+                        text="Game is over. It's a tie! Press any key to exit".format(game_state[1]))
+                else:
+                    self.of.error_text.config(text="Game is over. {} wins! Press any key to exit".format(game_state[1]))
 
-            self.of.error_text.config(text="")
+                self.hover_rect.destroy()
 
+                self.gm.wait_for_game_exit()
+
+            self.gm.change_player()
+
+            self.of.T.insert(END, "\nIt is {}'s turn.".format(self.gm.get_player()[0]))
+            self.of.T.see(END)
+
+            self.of.letters_label.config(text="Your letters are: {}".format(player[1]))
+            self.of.error_text.config(text="There are {} letters left".format(self.gm.get_number_of_letters_left()))
+            self.of.user_input.delete(0, END)
         except ValueError:
             self.of.error_text.config(text=exc_info()[1])
         except Exception:
             self.of.error_text.config(text="Unexpected error.")
+            print(exc_info())
 
     def motion_function(self, event, x=None, y=None):
 
@@ -97,7 +122,8 @@ class GameFrame(Frame):
             letter_label = Label(self, image=self.letter_ref[ord(word[i]) - ord('A')])
 
             letter_label.bind('<Motion>',
-                              lambda event, ind=i, hovx=self.hover_x, hovy=self.hover_y, xx=self.word_direction[0], yy=self.word_direction[1]:
+                              lambda event, ind=i, hovx=self.hover_x, hovy=self.hover_y, xx=self.word_direction[0],
+                              yy=self.word_direction[1]:
                               self.motion_function(event,
                                                    x=hovx + ind * xx,
                                                    y=hovy + ind * yy))

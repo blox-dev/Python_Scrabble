@@ -18,7 +18,7 @@ root = Tk()
 root.title("Tkinter Scrabble")
 root.geometry("{}x{}".format(SCREEN_WIDTH, SCREEN_HEIGHT))
 
-gm = GameManager(dictionary_file)
+gm = GameManager(root, dictionary_file)
 
 gf = GameFrame(root, gm)
 gf.pack()
