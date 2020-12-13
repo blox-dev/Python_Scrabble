@@ -1,5 +1,11 @@
+"""Contains the ScoreManager class"""
+
+
 class ScoreManager:
+    """Generates the special tiles board and calculates the score for a specific word"""
+
     def __init__(self):
+        """Generates the letter_socres dictionary and the special_tiles board"""
         self.letter_scores = {"R": 1, "B": 3, "I": 1, "N": 1, "O": 1, "L": 1, "C": 3, "V": 4, "G": 2, "A": 1, "S": 1,
                               "P": 3, "E": 1, "K": 5, "M": 3, "J": 8, "F": 4, "T": 1, "Y": 4, "U": 1, "Z": 10, "W": 4,
                               "Q": 10, "X": 8, "D": 2, "H": 4}
@@ -26,6 +32,13 @@ class ScoreManager:
         ]
 
     def calculate_word_score(self, posx, posy, word_direction, word):
+        """
+        Computes the score for a given word and returns it.
+        posx -- starting x position,
+        posy -- starting y position,
+        word_direction -- the word orientation on the board,
+        word -- the word to be computed.
+        """
         score = 0
         word_multiplier = 1
         word = word.upper()

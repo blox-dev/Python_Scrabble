@@ -1,9 +1,17 @@
+"""Contains the OptionsFrame class"""
+
 from tkinter import Frame, Label, Entry, Button, Text, END
 from sys import exc_info
 
 
 class OptionsFrame(Frame):
     def __init__(self, parent, game_manager, game_frame):
+        """
+        Initialises widgets and places them on the frame.
+        parent -- the master of this frame, usually the root window,
+        game_manager -- the game logic manager,
+        game_frame -- the GameFrame object
+        """
         Frame.__init__(self, parent)
         self.gm = game_manager
         self.gf = game_frame
@@ -39,45 +47,60 @@ class OptionsFrame(Frame):
 
         # Log window
 
-        self.T = Text(self, height=5, width=30)
-        self.T.grid(row=1, column=2, rowspan=3, padx=20)
-        self.T.insert(END, "It is {}'s turn.".format(self.gm.get_active_player()["name"]))
-        self.T.see(END)
+        self.log_window = Text(self, height=5, width=30)
+        self.log_window.grid(row=1, column=2, rowspan=3, padx=20)
+        self.log_window.insert(END, "It is {}'s turn.".format(self.gm.get_active_player()["name"]))
+        self.log_window.see(END)
 
     def discard_letters(self):
+        """Checks if the letters can be discarded and discards them."""
         try:
+            # Checks if the letters cand be discarded
             self.gm.attempt_discard_letters(self.user_input.get())
 
-            self.T.insert(END, "\n{} discarded: '{}'".format(self.gm.get_active_player()["name"],
-                                                             self.user_input.get().upper()))
+            # Updates widgets
+            self.log_window.insert(END, "\n{} discarded: '{}'".format(self.gm.get_active_player()["name"],
+                                                                      self.user_input.get().upper()))
 
             self.user_input.delete(0, END)
 
-            game_state, winner = self.gm.is_game_over()
-            if game_state:
-                if winner == 0:
-                    self.error_text.config(text="Game is over. It's a tie! Press any key to exit")
-                    self.T.insert(END, "\nIt's a tie!")
-                else:
-                    self.error_text.config(text="Game is over. {} wins! Press any key to exit".format(winner["name"]))
-                    self.T.insert(END, "\n{} wins!".format(winner["name"]))
+            # Checks if the game is over
+            self.is_game_over()
 
-                self.T.see(END)
-                self.gm.wait_for_game_exit()
-
-            self.gm.change_player()
-
+            # Finds the new active player
             new_player = self.gm.get_active_player()
 
-            self.T.insert(END, "\nIt is {}'s turn.".format(new_player["name"]))
-            self.T.see(END)
+            # Updates more widgets
+            self.log_window.insert(END, "\nIt is {}'s turn.".format(new_player["name"]))
+            self.log_window.see(END)
 
             self.letters_label.config(text="Your letters are: {}".format(new_player["letters"]))
 
             self.error_text.config(text="There are {} letters left".format(self.gm.get_number_of_letters_left()))
 
         except ValueError:
+            # The discarded letters are invalid
             self.error_text.config(text=exc_info()[1])
         except Exception:
+            # Unexpected error
             self.error_text.config(text="Unexpected error.")
             print(exc_info())
+
+    def is_game_over(self):
+        """
+        Checks if the game is over.
+        If the game is over, it displays the game's end screen, otherwise it changes the active player
+        """
+        game_state, winner = self.gm.is_game_over()
+        if game_state:
+            if winner == 0:
+                self.error_text.config(text="Game is over. It's a tie! Press any key to exit")
+                self.log_window.insert(END, "\nIt's a tie!")
+            else:
+                self.error_text.config(text="Game is over. {} wins! Press any key to exit".format(winner["name"]))
+                self.log_window.insert(END, "\n{} wins!".format(winner["name"]))
+
+            self.log_window.see(END)
+            self.gm.wait_for_game_exit()
+
+        self.gm.change_player()

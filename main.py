@@ -1,10 +1,13 @@
-from tkinter import Tk
+"""
+The starting point of the project.
+arguments: <dictionary_file> -- contains the word dictionary used for this game of scrabble.
+"""
 
+from tkinter import Tk
 from GameManager import GameManager
 from GameFrame import GameFrame
 from OptionsFrame import OptionsFrame
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT
-
+from utils import get_geometry
 from sys import argv
 
 if len(argv) != 2:
@@ -13,19 +16,25 @@ if len(argv) != 2:
 
 dictionary_file = argv[1]
 
+# Initialises the root window
 root = Tk()
-
 root.title("Tkinter Scrabble")
-root.geometry("{}x{}".format(SCREEN_WIDTH, SCREEN_HEIGHT))
 
+geometry = get_geometry(root)
+root.geometry(geometry)
+
+# Initialises the game manager and packs it
 gm = GameManager(root, dictionary_file)
 
+# Initialises the game frame
 gf = GameFrame(root, gm)
 gf.pack()
 
+# Initialises the options frame and packs it
 of = OptionsFrame(root, gm, gf)
 of.pack()
 
 gf.setOptionsFrame(of)
 
+# The main loop of the program
 root.mainloop()
