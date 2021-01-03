@@ -81,8 +81,8 @@ class GameManager:
         elif hover_y + word_len > GRID_SIZE:
             raise ValueError("Word is out of bounds.")
 
-        # if word not in self.dictionary:
-        #     raise ValueError("The word '{}' doesn't exist in your dictionary!".format(word))
+        if word not in self.dictionary:
+            raise ValueError("The word '{}' doesn't exist in your dictionary!".format(word))
 
         letters_on_board = []
         all_letters_on_board = True
