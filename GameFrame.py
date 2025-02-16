@@ -137,7 +137,7 @@ class GameFrame(Frame):
             img_cpy = self.hover_img.resize(
                 ((TILE_SIZE + SEPARATOR_SIZE) * (self.hover_length if self.word_direction[0] == 1 else 1),
                  (TILE_SIZE + SEPARATOR_SIZE) * (self.hover_length if self.word_direction[1] == 1 else 1)),
-                Image.ANTIALIAS)
+                Image.Resampling.LANCZOS)
             self.hover_img_cpy = ImageTk.PhotoImage(img_cpy)
             self.hover_rect.place_forget()
             self.hover_rect = Label(self, image=self.hover_img_cpy)

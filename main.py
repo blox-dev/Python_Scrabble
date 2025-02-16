@@ -10,31 +10,36 @@ from OptionsFrame import OptionsFrame
 from utils import get_geometry
 from sys import argv
 
-if len(argv) != 2:
-    print("Wrong number of arguments. Correct usage: py main.py <dictionary file>")
-    exit(0)
 
-dictionary_file = argv[1]
+def main():
+    if len(argv) > 2:
+        print("Wrong number of arguments. Correct usage: py main.py <dictionary file>")
+        exit(0)
 
-# Initialises the root window
-root = Tk()
-root.title("Tkinter Scrabble")
+    dictionary_file = argv[1] if len(argv) == 2 else "dictionary.txt"
 
-geometry = get_geometry(root)
-root.geometry(geometry)
+    # Initialises the root window
+    root = Tk()
+    root.title("Tkinter Scrabble")
 
-# Initialises the game manager and packs it
-gm = GameManager(root, dictionary_file)
+    geometry = get_geometry(root)
+    root.geometry(geometry)
 
-# Initialises the game frame
-gf = GameFrame(root, gm)
-gf.pack()
+    # Initialises the game manager and packs it
+    gm = GameManager(root, dictionary_file)
 
-# Initialises the options frame and packs it
-of = OptionsFrame(root, gm, gf)
-of.pack()
+    # Initialises the game frame
+    gf = GameFrame(root, gm)
+    gf.pack()
 
-gf.setOptionsFrame(of)
+    # Initialises the options frame and packs it
+    of = OptionsFrame(root, gm, gf)
+    of.pack()
 
-# The main loop of the program
-root.mainloop()
+    gf.setOptionsFrame(of)
+
+    # The main loop of the program
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
