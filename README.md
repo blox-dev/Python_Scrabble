@@ -4,6 +4,7 @@ Python Scrabble is a Python-based implementation of the classic Scrabble game, f
 
 ## 🚀 Demo
 
+![python_scrabble_small](https://github.com/user-attachments/assets/901706bf-899b-4062-9049-27028396d4ec)
 
 
 ## 📖 Project Overview
