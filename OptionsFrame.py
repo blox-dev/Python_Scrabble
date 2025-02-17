@@ -37,7 +37,7 @@ class OptionsFrame(Frame):
 
         player_letters = self.gm.get_active_player()["letters"]
 
-        self.letters_label = Label(self, text="Your letters are: {}".format(player_letters), font=self.font)
+        self.letters_label = Label(self, text="Your letters are:\n{}".format(player_letters), font=self.font)
         self.letters_label.grid(row=4, column=0)
 
         self.user_input = Entry(self, font=self.font)
@@ -57,6 +57,7 @@ class OptionsFrame(Frame):
         self.log_window.config(state="normal")
         self.log_window.insert(END, text)
         self.log_window.config(state="disabled")
+        self.log_window.see(END)
 
     def discard_letters(self):
         """Checks if the letters can be discarded and discards them."""
@@ -78,7 +79,7 @@ class OptionsFrame(Frame):
             # Updates more widgets
             self.log_to_window("\nIt is {}'s turn.".format(new_player["name"]))
 
-            self.letters_label.config(text="Your letters are: {}".format(new_player["letters"]))
+            self.letters_label.config(text="Your letters are:\n{}".format(new_player["letters"]))
 
             self.error_text.config(text="There are {} letters left".format(self.gm.get_number_of_letters_left()))
 

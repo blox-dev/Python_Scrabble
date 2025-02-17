@@ -73,16 +73,16 @@ class GameManager:
         word_len = len(word)
 
         if word_len < 2:
-            raise ValueError("Your word must be at least two letters long")
+            raise ValueError("Your word must be\nat least two letters long")
 
         if word_direction[0] == 1:
             if hover_x + word_len > GRID_SIZE:
-                raise ValueError("Word is out of bounds.")
+                raise ValueError("Word is out of bounds")
         elif hover_y + word_len > GRID_SIZE:
-            raise ValueError("Word is out of bounds.")
+            raise ValueError("Word is out of bounds")
 
         if word not in self.dictionary:
-            raise ValueError("The word '{}' doesn't exist in your dictionary!".format(word))
+            raise ValueError("The word '{}'\ndoesn't exist\nin your dictionary!".format(word))
 
         letters_on_board = []
         all_letters_on_board = True
@@ -99,24 +99,24 @@ class GameManager:
                 all_letters_on_board = False
 
         if all_letters_on_board:
-            raise ValueError("You must use at least one of your letters")
+            raise ValueError("You must use at least\none of your letters")
 
         if len(letters_on_board) == 0 and not contains_starting_tile:
-            raise ValueError("You must place your word connected to another word or the starting tile")
+            raise ValueError("You must connect your\nword to another word\nor the starting tile")
 
         pl_let = player_letters[:]
         pl_let.extend(letters_on_board)
 
         for letter in word:
             if letter not in pl_let:
-                raise ValueError("You can't make '{}' from your letters".format(word))
+                raise ValueError("You can't spell '{}'\nwith your letters".format(word))
 
             pl_let.remove(letter)
 
         for i in range(word_len):
             row, col = hover_y + i * word_direction[1], hover_x + i * word_direction[0]
             if self.gameBoard[row][col] not in ['-', '0'] and self.gameBoard[row][col] != word[i]:
-                raise ValueError("Your can't place your word there")
+                raise ValueError("You can't place your word there")
 
         # Placement is okay
 
@@ -168,7 +168,7 @@ class GameManager:
         word_len = len(word)
 
         if word_len < 1 or word_len > MAX_HAND_SIZE:
-            raise ValueError("You must discard between 1 and {} letters".format(MAX_HAND_SIZE))
+            raise ValueError("You must discard\nbetween 1 and {} letters".format(MAX_HAND_SIZE))
 
         pl_let = player_letters[:]
         for letter in word:

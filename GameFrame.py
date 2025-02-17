@@ -75,7 +75,7 @@ class GameFrame(Frame):
             # Updates more display widgets
             self.of.log_to_window("\nIt is {}'s turn.".format(new_player["name"]))
 
-            self.of.letters_label.config(text="Your letters are: {}".format(new_player["letters"]))
+            self.of.letters_label.config(text="Your letters are:\n{}".format(new_player["letters"]))
             self.of.error_text.config(text="There are {} letters left".format(self.gm.get_number_of_letters_left()))
             self.of.user_input.delete(0, END)
         except ValueError:
