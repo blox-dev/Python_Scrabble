@@ -24,17 +24,18 @@ def main():
 
     geometry = get_geometry(root)
     root.geometry(geometry)
+    root.update()
 
     # Initialises the game manager and packs it
     gm = GameManager(root, dictionary_file)
 
     # Initialises the game frame
     gf = GameFrame(root, gm)
-    gf.pack()
+    gf.grid(row=0, column=0)
 
     # Initialises the options frame and packs it
     of = OptionsFrame(root, gm, gf)
-    of.pack()
+    of.grid(row=0, column=1)
 
     gf.setOptionsFrame(of)
 

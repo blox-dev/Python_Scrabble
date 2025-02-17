@@ -25,7 +25,7 @@ class GameFrame(Frame):
         self.letter_ref = utils.create_letter_images()
         self.bgImage = ImageTk.PhotoImage(Image.open("img/scrabble_board.png"))
 
-        Frame.__init__(self, parent, width=self.bgImage.width(), height=self.bgImage.height())
+        super().__init__(parent, width=self.bgImage.width(), height=self.bgImage.height())
         self.hover_x = 0
         self.hover_y = 0
         self.hover_length = 0
@@ -61,7 +61,7 @@ class GameFrame(Frame):
             else:
                 self.of.score_2.config(text="{}: {}".format(player["name"], player["score"]))
 
-            self.of.log_window.insert(END, "\n{} played: '{}'".format(player["name"], self.of.user_input.get().upper()))
+            self.of.log_to_window("\n{} played: '{}'".format(player["name"], self.of.user_input.get().upper()))
 
             # Places the actual word
             self.place_word_on_canvas()
@@ -73,8 +73,7 @@ class GameFrame(Frame):
             new_player = self.gm.get_active_player()
 
             # Updates more display widgets
-            self.of.log_window.insert(END, "\nIt is {}'s turn.".format(new_player["name"]))
-            self.of.log_window.see(END)
+            self.of.log_to_window("\nIt is {}'s turn.".format(new_player["name"]))
 
             self.of.letters_label.config(text="Your letters are: {}".format(new_player["letters"]))
             self.of.error_text.config(text="There are {} letters left".format(self.gm.get_number_of_letters_left()))
@@ -96,12 +95,11 @@ class GameFrame(Frame):
         if game_state:
             if winner == 0:
                 self.of.error_text.config(text="Game is over. It's a tie! Press any key to exit")
-                self.of.log_window.insert(END, "\nIt's a tie!")
+                self.of.log_to_window("\nIt's a tie!")
             else:
                 self.of.error_text.config(
                     text="Game is over. {} wins! Press any key to exit".format(winner["name"]))
-                self.of.log_window.insert(END, "\n{} wins!".format(winner["name"]))
-            self.of.log_window.see(END)
+                self.of.log_to_window("\n{} wins!".format(winner["name"]))
             self.hover_rect.destroy()
             self.gm.wait_for_game_exit()
         else:
