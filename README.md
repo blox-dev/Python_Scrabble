@@ -20,7 +20,7 @@ Scrabble is a word-forming game where players earn points by placing tiles on a 
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/your_username/python-scrabble.git
+    git clone https://github.com/blox-dev/Python_Scrabble.git
     cd python-scrabble
     ```
 2. Install the required dependencies:
